@@ -120,7 +120,7 @@ class VRP {
   }
 };
 
-// One time computation to compute distances between every pair of nodes.
+// One time computation to compute distances between pair of nodes.
 // Decision to round or not round is actioned here
 std::vector<std::vector<Edge>>
 VRP::cal_graph_dist() {
