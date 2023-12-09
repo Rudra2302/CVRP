@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <fstream>
 #include <sstream>  //stringstream
+#include <assert.h>
 
 #include <random>
 #include <chrono>  //timing CPU
@@ -98,9 +99,12 @@ class VRP {
       j = temp;
     }
 
-    size_t myoffset = ((2 * i * size) - (i * i) + i) / 2;
-    size_t correction = 2 * i + 1;
-    return dist[myoffset + j - correction];
+    Point p1 = node[i];
+    Point p2 = node[j];
+    return sqrt(((p1.x - p2.x) * (p1.x - p2.x)) + ((p1.y - p2.y) * (p1.y - p2.y)));
+    // size_t myoffset = ((2 * i * size) - (i * i) + i) / 2;
+    // size_t correction = 2 * i + 1;
+    // return dist[myoffset + j - correction];
   }
 
   public:
@@ -122,7 +126,7 @@ std::vector<std::vector<Edge>>
 VRP::cal_graph_dist() {
   //std::cout<< "size:" << (size*(size-1))/2 << '\n';
 
-  dist.resize((size * (size - 1)) / 2);  //n \choose 2. i.e n(n-1)/2
+  // dist.resize((size * (size - 1)) / 2);  //n \choose 2. i.e n(n-1)/2
 
   std::vector<std::vector<Edge>> nG(size);
 
@@ -130,11 +134,11 @@ VRP::cal_graph_dist() {
   for (size_t i = 0; i < size; ++i) {
     for (size_t j = i + 1; j < size; ++j) {
       weight_t w = sqrt(((node[i].x - node[j].x) * (node[i].x - node[j].x)) + ((node[i].y - node[j].y) * (node[i].y - node[j].y)));
+ 
+      // dist[k] = (params.toRound ? round(w) : w);  //TO round or not to.
 
-      dist[k] = (params.toRound ? round(w) : w);  //TO round or not to.
-
-      nG[i].push_back(Edge(j, w));
-      nG[j].push_back(Edge(i, w));
+      // nG[i].push_back(Edge(j, w));
+      // nG[j].push_back(Edge(i, w));
       //~ printf("k=%zd d[%zd][%zd]=%lf\n",k,i,j,w);
       k++;
     }
@@ -190,6 +194,8 @@ unsigned VRP::read(string filename) {
   //~ ...
   //~ n  xn  yn
 
+  node[0].x = 0;
+  node[0].y = 0;
   for (size_t i = 0; i < size; ++i) {
     getline(in, line);
 
@@ -198,8 +204,8 @@ unsigned VRP::read(string filename) {
     string xStr, yStr;
 
     iss >> id >> xStr >> yStr;
-    node[i].x = stof(xStr);
-    node[i].y = stof(yStr);
+    node[id].x = stof(xStr);
+    node[id].y = stof(yStr);
   }
 
   // skip DEMAND_SECTION
@@ -235,57 +241,117 @@ void VRP::print() {
 }
 
 // Prims's MST using STL set
-std::vector<std::vector<Edge>>
-PrimsAlgo(const VRP &vrp, std::vector<std::vector<Edge>> &graph) {
-  auto N = graph.size();
-  const node_t INIT = -1;
-  //! std::cout<< "N "<< N << '\n';
+// std::vector<std::vector<Edge>>
+// PrimsAlgo(const VRP &vrp, std::vector<std::vector<Edge>> &graph) {
+//   auto N = graph.size();
+//   // std::cerr << N << std::endl;
+//   const node_t INIT = -1;
+//   //! std::cout<< "N "<< N << '\n';
 
-  std::vector<weight_t> key(N, INT_MAX);
-  std::vector<weight_t> toEdges(N, -1);
-  std::vector<bool> visited(N, false);
+//   std::vector<weight_t> key(N, INT_MAX);
+//   std::vector<weight_t> toEdges(N, -1);
+//   std::vector<bool> visited(N, false);
 
-  std::set<std::pair<weight_t, node_t>> active;  // holds value and vertex
-  std::vector<std::vector<Edge>> nG(N);
+//   std::set<std::pair<weight_t, node_t>> active;  // holds value and vertex
+//   std::vector<std::vector<Edge>> nG(N);
 
-  node_t src = 0;
-  key[src] = 0.0;
-  active.insert({0.0, src});
+//   node_t src = 0;
+//   key[src] = 0.0;
+//   active.insert({0.0, src});
 
-  while (active.size() > 0) {
-    auto where = active.begin()->second;
+//   while (active.size() > 0) {
+//     auto where = active.begin()->second;
 
-    //! DEBUG std::cout << "picked " << where <<"\tsize"<< active.size()<< std::endl;
-    active.erase(active.begin());
-    if (visited[where]) {
-      continue;
+//     //! DEBUG std::cout << "picked " << where <<"\tsize"<< active.size()<< std::endl;
+//     active.erase(active.begin());
+//     if (visited[where]) {
+//       continue;
+//     }
+//     visited[where] = true;
+//     for(int i=0; i<N;i++)
+//     { 
+//         if(i == where) continue;
+//         if(!visited[i])
+//         {
+//             weight_t w = vrp.get_dist(where, i);
+//             if(w < key[i])
+//             {
+//                 key[i] = w;
+//                 active.insert({key[i], i});
+//                 toEdges[i] = where;
+//             }
+//         }
+//     }
+//     // for (Edge E : graph[where]) {
+//     //   if (!visited[E.to] && E.length < key[E.to]) {  //W[{where,E.to}]
+//     //     key[E.to] = E.length;                        //W[{where,E.to}]
+//     //     active.insert({key[E.to], E.to});
+//     //     //! DEBUG std::cout << key[E.to] <<" ~ " <<  E.to << std::endl;
+//     //     toEdges[E.to] = where;
+//     //   }
+//     // }
+//   }
+
+//   //! std::vector < std::pair<int,int>> edges; // not used
+//   node_t u = 0;
+//   for (auto v : toEdges) {  // nice parallel code or made to parallel
+//     if (v != INIT) {
+//       //! int w = W[{u,v}];
+//       weight_t w = vrp.get_dist(u, v);
+
+//       nG[u].push_back(Edge(v, w));
+//       nG[v].push_back(Edge(u, w));
+//       //! edges.push_back(std::make_pair(u,v));
+//       DEBUG std::cout << u << " -- " << v << '\n';
+//     }
+//     u++;
+//   }
+//   return nG;
+// }
+
+std::vector<std::vector<Edge>> PrimsAlgo(const VRP &vrp, std::vector<std::vector<Edge>> &graph)
+{
+    // implement another version of PrimsAlgo
+    int N = graph.size();
+    weight_t total_wt = 0.0;
+    std::set<node_t> unvisited;
+    std::vector<std::pair<weight_t,node_t>> min_wt;
+    min_wt.resize(N);
+    std::vector<std::vector<Edge>> nG(N);
+    for(int i=0;i<N;i++)
+    {
+        unvisited.insert(i);
+        min_wt[i] = std::make_pair(INT_MAX, -1);
     }
-    visited[where] = true;
-    for (Edge E : graph[where]) {
-      if (!visited[E.to] && E.length < key[E.to]) {  //W[{where,E.to}]
-        key[E.to] = E.length;                        //W[{where,E.to}]
-        active.insert({key[E.to], E.to});
-        //! DEBUG std::cout << key[E.to] <<" ~ " <<  E.to << std::endl;
-        toEdges[E.to] = where;
-      }
+    for(int i=0;i<N;i++)
+    {
+        node_t v = -1;
+        for(auto j : unvisited)
+        {
+            if(v == -1 || min_wt[j].first < min_wt[v].first)
+            {
+                v = j;
+            }
+        }
+        unvisited.erase(v);
+        total_wt += min_wt[v].first;
+        if(min_wt[v].second != -1)
+        {
+            DEBUG std::cout << v << " -- " << min_wt[v].second << '\n';
+            nG[v].push_back(Edge(min_wt[v].second, min_wt[v].first));
+            nG[min_wt[v].second].push_back(Edge(v, min_wt[v].first));
+        }
+        for(int to = 0; to < N; to++)
+        {
+            weight_t dist = vrp.get_dist(v, to);
+            if(dist < min_wt[to].first)
+            {
+                min_wt[to].first = dist;
+                min_wt[to].second = v;
+            }
+        }
     }
-  }
-
-  //! std::vector < std::pair<int,int>> edges; // not used
-  node_t u = 0;
-  for (auto v : toEdges) {  // nice parallel code or made to parallel
-    if (v != INIT) {
-      //! int w = W[{u,v}];
-      weight_t w = vrp.get_dist(u, v);
-
-      nG[u].push_back(Edge(v, w));
-      nG[v].push_back(Edge(u, w));
-      //! edges.push_back(std::make_pair(u,v));
-      DEBUG std::cout << u << " -- " << v << '\n';
-    }
-    u++;
-  }
-  return nG;
+    return nG;
 }
 
 // Graph's Adjacency information.
@@ -302,7 +368,7 @@ void printAdjList(const std::vector<std::vector<Edge>> &graph) {
 }
 
 // DFS Recursive.
-void ShortCircutTour(std::vector<std::vector<Edge>> &g, std::vector<bool> &visited, node_t u, std::vector<node_t> &out) {
+void  ShortCircutTour(std::vector<std::vector<Edge>> &g, std::vector<bool> &visited, node_t u, std::vector<node_t> &out) {
   visited[u] = true;
   DEBUG std::cout << u << ' ';
   //! cvrpInOut.addRouteVertex(u);
@@ -457,62 +523,110 @@ void tsp_2opt(const VRP &vrp, std::vector<node_t> &cities, std::vector<node_t> &
   // 'cities' contains the original solution. It is updated during the course of the 2opt-scheme to contain the 2opt soln.
   // 'tour' is an auxillary array.
 
+  std::cerr << "tsp_2opt entered" << std::endl;
   // repeat until no improvement is made
   unsigned improve = 0;
 
-  while (improve < 2) {
-    double best_distance = 0.0;
-    //~ best_distance += L2_dist(points.x_coords[cities[0]], points.y_coords[cities[0]], 0, 0); // computing distance of the first point in the route with the depot.
-    best_distance += vrp.get_dist(DEPOT, cities[0]);  // computing distance of the first point in the route with the depot.
+  int changed_pos1 = -1, changed_pos2 = -1;
+  double best_distance = 0.0;
+  //~ best_distance += L2_dist(points.x_coords[cities[0]], points.y_coords[cities[0]], 0, 0); // computing distance of the first point in the route with the depot.
+  best_distance += vrp.get_dist(DEPOT, cities[0]);  // computing distance of the first point in the route with the depot.
 
-    for (unsigned jj = 1; jj < ncities; ++jj) {
-      //~ best_distance += L2_dist(points.x_coords[cities[jj-1]], points.y_coords[cities[jj-1]], points.x_coords[cities[jj]], points.y_coords[cities[jj]]);
-      best_distance += vrp.get_dist(cities[jj - 1], cities[jj]);
-    }
-    //~ best_distance += L2_dist(points.x_coords[cities[ncities-1]], points.y_coords[cities[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
-    best_distance += vrp.get_dist(DEPOT, cities[ncities - 1]);
+  for (unsigned jj = 1; jj < ncities; ++jj) {
+    //~ best_distance += L2_dist(points.x_coords[cities[jj-1]], points.y_coords[cities[jj-1]], points.x_coords[cities[jj]], points.y_coords[cities[jj]]);
+    best_distance += vrp.get_dist(cities[jj - 1], cities[jj]);
+  }
+  //~ best_distance += L2_dist(points.x_coords[cities[ncities-1]], points.y_coords[cities[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
+  best_distance += vrp.get_dist(DEPOT, cities[ncities - 1]);
+  std::cerr << best_distance << std::endl;
+  double best_distance1 = best_distance;
+  while (improve < 2) {
     // 1x 2x 3x 4 5
     //  1 2  3  4 5
     for (unsigned i = 0; i < ncities - 1; i++) {
       for (unsigned k = i + 1; k < ncities; k++) {
-        for (unsigned c = 0; c < i; ++c) {
-          tour[c] = cities[c];
-        }
+        // for (unsigned c = 0; c < i; ++c) {
+        //   tour[c] = cities[c];
+        // }
 
-        unsigned dec = 0;
-        for (unsigned c = i; c < k + 1; ++c) {
-          tour[c] = cities[k - dec];
-          dec++;
-        }
+        // unsigned dec = 0;
+        // for (unsigned c = i; c < k + 1; ++c) {
+        //   tour[c] = cities[k - dec];
+        //   dec++;
+        // }
 
-        for (unsigned c = k + 1; c < ncities; ++c) {
-          tour[c] = cities[c];
-        }
-        double new_distance = 0.0;
-        //~ new_distance += L2_dist(points.x_coords[tour[0]], points.y_coords[tour[0]], 0, 0); // computing distance of the first point in the route with the depot.
-        new_distance += vrp.get_dist(DEPOT, tour[0]);
-        for (unsigned jj = 1; jj < ncities; ++jj) {
-          //~ new_distance += L2_dist(points.x_coords[tour[jj-1]], points.y_coords[tour[jj-1]], points.x_coords[tour[jj]], points.y_coords[tour[jj]]);
-          new_distance += vrp.get_dist(tour[jj - 1], tour[jj]);
-        }
-        //~ new_distance += L2_dist(points.x_coords[tour[ncities-1]], points.y_coords[tour[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
-        new_distance += vrp.get_dist(DEPOT, tour[ncities - 1]);
+        // for (unsigned c = k + 1; c < ncities; ++c) {
+        //   tour[c] = cities[c];
+        // }
+        // double new_distance = 0.0;
+        // //~ new_distance += L2_dist(points.x_coords[tour[0]], points.y_coords[tour[0]], 0, 0); // computing distance of the first point in the route with the depot.
+        // new_distance += vrp.get_dist(DEPOT, tour[0]);
+        // for (unsigned jj = 1; jj < ncities; ++jj) {
+        //   //~ new_distance += L2_dist(points.x_coords[tour[jj-1]], points.y_coords[tour[jj-1]], points.x_coords[tour[jj]], points.y_coords[tour[jj]]);
+        //   new_distance += vrp.get_dist(tour[jj - 1], tour[jj]);
+        // }
+        // //~ new_distance += L2_dist(points.x_coords[tour[ncities-1]], points.y_coords[tour[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
+        // new_distance += vrp.get_dist(DEPOT, tour[ncities - 1]);
 
+        double new_distance = best_distance1;
+        if(i == 0)
+        {
+          new_distance -= vrp.get_dist(DEPOT, cities[0]);
+          new_distance += vrp.get_dist(DEPOT, cities[k]);
+        }
+        else
+        {
+          new_distance -= vrp.get_dist(cities[i-1], cities[i]);
+          new_distance += vrp.get_dist(cities[i-1], cities[k]);
+        }
+        if(k == ncities-1)
+        {
+          new_distance -= vrp.get_dist(DEPOT, cities[ncities-1]);
+          new_distance += vrp.get_dist(DEPOT, cities[i]);
+        }
+        else
+        {
+          new_distance -= vrp.get_dist(cities[k], cities[k+1]);
+          new_distance += vrp.get_dist(cities[i], cities[k+1]);
+        }
+        // if(i == 0 && k == 1)
+        // {
+        //     std::cerr << "new_distance = " << new_distance << std::endl;
+        //     std::cerr << "best_distance = " << best_distance << std::endl;
+        // }
         if (new_distance < best_distance) {
           // Improvement found so reset
+          // std::cerr << new_distance << " " << best_distance << " " <<  i << " " << k << std::endl;
           improve = 0;
-          for (unsigned jj = 0; jj < ncities; jj++)
-            cities[jj] = tour[jj];
+          changed_pos1 = i;
+          changed_pos2 = k;
           best_distance = new_distance;
         }
       }
+      // std::cerr << "route number " << i << " done" << std::endl;  
     }
     improve++;
   }
+  if (changed_pos1 != -1 && changed_pos2 != -1) {
+    // Apply the 2-opt swap between changed_pos1 and changed_pos2
+    int dec = 0;
+    for (unsigned c = 0; c < changed_pos1; ++c) {
+      tour[c] = cities[c];
+    }
+    for (unsigned c = changed_pos1; c < changed_pos2 + 1; ++c) {
+      tour[c] = cities[changed_pos2 - dec];
+      dec++;
+    }
+    for (unsigned c = changed_pos2 + 1; c < ncities; ++c) {
+      tour[c] = cities[c];
+    }
+  }
+  std::cerr << "tsp_2opt exited" << std::endl;
 }
 
 std::vector<std::vector<node_t>>
 postprocess_2OPT(const VRP &vrp, std::vector<std::vector<node_t>> &final_routes) {
+  std::cerr << "postprocess_2OPT entered" << std::endl;
   std::vector<std::vector<node_t>> postprocessed_final_routes;
 
   unsigned nroutes = final_routes.size();
@@ -539,6 +653,7 @@ postprocess_2OPT(const VRP &vrp, std::vector<std::vector<node_t>> &final_routes)
 
     postprocessed_final_routes.push_back(curr_route);
   }
+  std::cerr << "postprocess_2OPT exited" << std::endl;
   return postprocessed_final_routes;
 }
 
@@ -566,11 +681,15 @@ weight_t get_total_cost_of_routes(const VRP &vrp, vector<vector<node_t>> &final_
 //
 std::vector<std::vector<node_t>>
 postProcessIt(const VRP &vrp, std::vector<std::vector<node_t>> &final_routes, weight_t &minCost) {
+  std::cerr << "postProcessIt entered" << std::endl;  
   std::vector<std::vector<node_t>> postprocessed_final_routes;
 
   auto postprocessed_final_routes1 = postprocess_tsp_approx(vrp, final_routes);
+  std::cerr << "postprocess_tsp_approx done" << std::endl;
   auto postprocessed_final_routes2 = postprocess_2OPT(vrp, postprocessed_final_routes1);
+  std::cerr << "postprocess_2OPT done" << std::endl;
   auto postprocessed_final_routes3 = postprocess_2OPT(vrp, final_routes);
+  std::cerr << "postprocess_2OPT done" << std::endl;
 
 //~ weight_t postprocessed_final_routes_cost;
 #pragma omp parallel for
@@ -661,15 +780,19 @@ bool verify_sol(const VRP &vrp, vector<vector<node_t>> final_routes, unsigned ca
       hist[final_routes[i][j]] += 1;
     }
     if (route_sum_of_demands > capacity) {
+      cout << "Capacity constraint violated for route " << i << endl;
+      cout << "Capacity: " << capacity << " Route sum of demands: " << route_sum_of_demands << endl;
       return false;
     }
   }
 
   for (unsigned i = 1; i < vrp.getSize(); ++i) {
     if (hist[i] > 1) {
+      cout << "Vertex " << i << " appears more than once in the solution." << endl;
       return false;
     }
     if (hist[i] == 0) {
+      cout << "Vertex " << i << " does not appear in the solution." << endl;
       return false;
     }
   }
@@ -709,8 +832,12 @@ int main(int argc, char *argv[]) {
   //~ vrp.print();
   auto cG = vrp.cal_graph_dist();  // complete graph.
 
+  std::cerr << "graph input taken" << std::endl;
+
   //~ vrp.print_dist();
   auto mstG = PrimsAlgo(vrp, cG);
+
+  std::cerr << "MST made" << std::endl;
 
   //~ printAdjList(mstG);
 
@@ -756,7 +883,7 @@ int main(int argc, char *argv[]) {
   uint64_t elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
   auto timeUpto1 = (double)(elapsed * 1.E-9);
-  //~ short PARLIMIT = ((argc == 3) ? stoi(argv[2]) : 20);  //Default stride is 20 if arg 3 is not provided!
+  //~ short PARLIMIT = ((argc == 3) ? stof(argv[2]) : 20);  //Default stride is 20 if arg 3 is not provided!
   short PARLIMIT = vrp.params.nThreads;
 
 #pragma omp parallel for shared(minCost, minRoute) num_threads(PARLIMIT)
@@ -783,17 +910,23 @@ int main(int argc, char *argv[]) {
       minCost = aCostRoute.first;
       minRoute = aCostRoute.second;
     }
+    if(i%5000 == 0)
+    {
+      std::cerr << "iteration number " << i << " has been done" << std::endl;
+    }
   }
 
   //// UPTO2
   //   END TIMER
   auto minCost2 = minCost;
-  end = std::chrono::high_resolution_clock::now();
+  end = std::chrono::high_resolution_clock::now ();
   elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
   auto timeUpto2 = (double)(elapsed * 1.E-9);
 
   auto postRoutes = postProcessIt(vrp, minRoute, minCost);
+
+  std::cerr << "post processing done" << std::endl;
 
   // END TIMER ALL
   end = std::chrono::high_resolution_clock::now();

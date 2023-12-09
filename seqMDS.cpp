@@ -171,7 +171,7 @@ unsigned VRP::read(string filename) {
 
   // DIMENSION
   getline(in, line);
-  size = stof(line.substr(line.find(":") + 2));
+  size = stod(line.substr(line.find(":") + 2));
 
   // DISTANCE TYPE
   getline(in, line);
@@ -179,7 +179,7 @@ unsigned VRP::read(string filename) {
 
   // CAPACITY
   getline(in, line);
-  capacity = stof(line.substr(line.find(":") + 2));
+  capacity = stod(line.substr(line.find(":") + 2));
 
   //skip NODE_COORD_SECTION
   getline(in, line);
@@ -201,8 +201,8 @@ unsigned VRP::read(string filename) {
     string xStr, yStr;
 
     iss >> id >> xStr >> yStr;
-    node[i].x = stof(xStr);
-    node[i].y = stof(yStr);
+    node[i].x = stod(xStr);
+    node[i].y = stod(yStr);
   }
 
   // skip DEMAND_SECTION
@@ -216,7 +216,7 @@ unsigned VRP::read(string filename) {
 
     iss >> id >> dStr;
 
-    node[i].demand = stof(dStr);
+    node[i].demand = stod(dStr);
 
     //assert(i==(id-1));
   }
