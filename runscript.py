@@ -1,6 +1,6 @@
 import os
 
-nvalues = [5000,6000,10000,20000]
+nvalues = [5000,6000,10000,15000,20000]
 
 for n in nvalues:
     inputfile = "myInputs/inp" + str(n) + ".vrp"
