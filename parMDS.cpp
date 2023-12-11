@@ -519,6 +519,64 @@ postprocess_tsp_approx(const VRP &vrp, std::vector<std::vector<node_t>> &solRout
   return modifiedRoutes;
 }
 
+// void tsp_2opt(const VRP &vrp, std::vector<node_t> &cities, std::vector<node_t> &tour, unsigned ncities) {
+//   // 'cities' contains the original solution. It is updated during the course of the 2opt-scheme to contain the 2opt soln.
+//   // 'tour' is an auxillary array.
+
+//   // repeat until no improvement is made
+//   unsigned improve = 0;
+
+//   while (improve < 2) {
+//     double best_distance = 0.0;
+//     //~ best_distance += L2_dist(points.x_coords[cities[0]], points.y_coords[cities[0]], 0, 0); // computing distance of the first point in the route with the depot.
+//     best_distance += vrp.get_dist(DEPOT, cities[0]);  // computing distance of the first point in the route with the depot.
+
+//     for (unsigned jj = 1; jj < ncities; ++jj) {
+//       //~ best_distance += L2_dist(points.x_coords[cities[jj-1]], points.y_coords[cities[jj-1]], points.x_coords[cities[jj]], points.y_coords[cities[jj]]);
+//       best_distance += vrp.get_dist(cities[jj - 1], cities[jj]);
+//     }
+//     //~ best_distance += L2_dist(points.x_coords[cities[ncities-1]], points.y_coords[cities[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
+//     best_distance += vrp.get_dist(DEPOT, cities[ncities - 1]);
+//     // 1x 2x 3x 4 5
+//     //  1 2  3  4 5
+//     for (unsigned i = 0; i < ncities - 1; i++) {
+//       for (unsigned k = i + 1; k < ncities; k++) {
+//         for (unsigned c = 0; c < i; ++c) {
+//           tour[c] = cities[c];
+//         }
+
+//         unsigned dec = 0;
+//         for (unsigned c = i; c < k + 1; ++c) {
+//           tour[c] = cities[k - dec];
+//           dec++;
+//         }
+
+//         for (unsigned c = k + 1; c < ncities; ++c) {
+//           tour[c] = cities[c];
+//         }
+//         double new_distance = 0.0;
+//         //~ new_distance += L2_dist(points.x_coords[tour[0]], points.y_coords[tour[0]], 0, 0); // computing distance of the first point in the route with the depot.
+//         new_distance += vrp.get_dist(DEPOT, tour[0]);
+//         for (unsigned jj = 1; jj < ncities; ++jj) {
+//           //~ new_distance += L2_dist(points.x_coords[tour[jj-1]], points.y_coords[tour[jj-1]], points.x_coords[tour[jj]], points.y_coords[tour[jj]]);
+//           new_distance += vrp.get_dist(tour[jj - 1], tour[jj]);
+//         }
+//         //~ new_distance += L2_dist(points.x_coords[tour[ncities-1]], points.y_coords[tour[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
+//         new_distance += vrp.get_dist(DEPOT, tour[ncities - 1]);
+
+//         if (new_distance < best_distance) {
+//           // Improvement found so reset
+//           improve = 0;
+//           for (unsigned jj = 0; jj < ncities; jj++)
+//             cities[jj] = tour[jj];
+//           best_distance = new_distance;
+//         }
+//       }
+//     }
+//     improve++;
+//   }
+// }
+
 void tsp_2opt(const VRP &vrp, std::vector<node_t> &cities, std::vector<node_t> &tour, unsigned ncities) {
   // 'cities' contains the original solution. It is updated during the course of the 2opt-scheme to contain the 2opt soln.
   // 'tour' is an auxillary array.
@@ -545,29 +603,6 @@ void tsp_2opt(const VRP &vrp, std::vector<node_t> &cities, std::vector<node_t> &
     //  1 2  3  4 5
     for (unsigned i = 0; i < ncities - 1; i++) {
       for (unsigned k = i + 1; k < ncities; k++) {
-        // for (unsigned c = 0; c < i; ++c) {
-        //   tour[c] = cities[c];
-        // }
-
-        // unsigned dec = 0;
-        // for (unsigned c = i; c < k + 1; ++c) {
-        //   tour[c] = cities[k - dec];
-        //   dec++;
-        // }
-
-        // for (unsigned c = k + 1; c < ncities; ++c) {
-        //   tour[c] = cities[c];
-        // }
-        // double new_distance = 0.0;
-        // //~ new_distance += L2_dist(points.x_coords[tour[0]], points.y_coords[tour[0]], 0, 0); // computing distance of the first point in the route with the depot.
-        // new_distance += vrp.get_dist(DEPOT, tour[0]);
-        // for (unsigned jj = 1; jj < ncities; ++jj) {
-        //   //~ new_distance += L2_dist(points.x_coords[tour[jj-1]], points.y_coords[tour[jj-1]], points.x_coords[tour[jj]], points.y_coords[tour[jj]]);
-        //   new_distance += vrp.get_dist(tour[jj - 1], tour[jj]);
-        // }
-        // //~ new_distance += L2_dist(points.x_coords[tour[ncities-1]], points.y_coords[tour[ncities-1]], 0, 0); // computing distance of the last point in the route with the depot.
-        // new_distance += vrp.get_dist(DEPOT, tour[ncities - 1]);
-
         double new_distance = best_distance1;
         if(i == 0)
         {
