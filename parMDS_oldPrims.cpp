@@ -974,6 +974,7 @@ int main(int argc, char *argv[]) {
   verified = verify_sol(vrp, postRoutes, vrp.getCapacity());
 
   // Cost after Step 1, Step 2 & 3, and Step 4.
+  std::cerr << "parMDS_oldPrims ";
   std::cerr << argv[1] << " Cost ";
   std::cerr << minCost1 << ' ';
   std::cerr << minCost2 << ' ';
