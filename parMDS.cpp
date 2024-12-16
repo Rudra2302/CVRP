@@ -413,7 +413,8 @@ double euclideanDistance(Point p1, Point p2){
 
 std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::vector<Edge>> graph)
 {
-  int gridSize = 2, N=graph.size(), it=0;
+  int N=graph.size(), it=0;
+  int gridSize = pow(N,0.25);
   std::vector<std::vector<Point>> grid(gridSize * gridSize);
   std::map<std::pair<int,int>,int> coord;
   double cellSize_x = vrp.max_x/gridSize+1, cellSize_y = vrp.max_y/gridSize+1;
