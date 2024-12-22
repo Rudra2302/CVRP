@@ -413,8 +413,10 @@ double euclideanDistance(Point p1, Point p2){
 
 std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::vector<Edge>> graph)
 {
+  std::chrono::high_resolution_clock::time_point start_func = std::chrono::high_resolution_clock::now();
   int N=graph.size(), it=0;
-  int gridSize = pow(N,0.25);
+  // int gridSize = pow(N,0.25);
+  int gridSize = 10;
   std::vector<std::vector<Point>> grid(gridSize * gridSize);
   std::map<std::pair<int,int>,int> coord;
   double cellSize_x = vrp.max_x/gridSize+1, cellSize_y = vrp.max_y/gridSize+1;
@@ -427,6 +429,12 @@ std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::v
 
       coord[{cellIndex,grid[cellIndex].size()-1}]=it; it++;
   }
+
+  std::chrono::high_resolution_clock::time_point end_for1 = std::chrono::high_resolution_clock::now();
+  uint64_t elapsed_for1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_for1 - start_func).count();
+
+  auto time_for1 = (double)(elapsed_for1 * 1.E-9);
+  std::cout << "time at end of for loop 1: " << time_for1 << std::endl;
 
   std::vector<std::vector<Edge>> localMSTs(N);
   for (int i = 0; i < grid.size(); ++i) {
@@ -467,6 +475,12 @@ std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::v
         }
     }
 
+    std::chrono::high_resolution_clock::time_point end_for2 = std::chrono::high_resolution_clock::now();
+    uint64_t elapsed_for2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_for2 - start_func).count();
+
+    auto time_for2 = (double)(elapsed_for2 * 1.E-9);
+    std::cout << "time at end of for loop 2: " << time_for2 << std::endl;
+
     for (int row = 0; row < gridSize; ++row) {
         for (int col = 0; col < gridSize; ++col) {
             int cellIndex = row * gridSize + col;
@@ -503,6 +517,12 @@ std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::v
             }
         }
     }
+
+    std::chrono::high_resolution_clock::time_point end_for3 = std::chrono::high_resolution_clock::now();
+    uint64_t elapsed_for3 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_for3 - start_func).count();
+
+    auto time_for3 = (double)(elapsed_for3 * 1.E-9);
+    std::cout << "time at end of for loop 3: " << time_for3 << std::endl;
 
     return localMSTs;
 }
