@@ -1,0 +1,38 @@
+#%Module1.0
+
+# Copyright (c) 2023 NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+conflict nvhpc
+conflict nvhpc-nompi
+conflict nvhpc-byo-compiler
+conflict nvhpc-hpcx
+
+set nvhome /home/saptarshi/Documents/Sem7/CVRP/parMDS
+set target Linux_x86_64
+set version 23.9
+
+set nvcudadir $nvhome/$target/$version/cuda
+set nvmathdir $nvhome/$target/$version/math_libs
+set nvcommdir $nvhome/$target/$version/comm_libs
+
+setenv NVHPC $nvhome
+setenv NVHPC_ROOT $nvhome/$target/$version
+
+prepend-path PATH $nvcudadir/bin
+
+prepend-path CPATH $nvcudadir/include
+prepend-path CPATH $nvmathdir/include
+prepend-path CPATH $nvcommdir/nccl/include
+prepend-path CPATH $nvcommdir/nvshmem/include
+
+prepend-path LD_LIBRARY_PATH $nvcudadir/lib64
+prepend-path LD_LIBRARY_PATH $nvcudadir/extras/CUPTI/lib64
+prepend-path LD_LIBRARY_PATH $nvmathdir/lib64
+prepend-path LD_LIBRARY_PATH $nvcommdir/nccl/lib
+prepend-path LD_LIBRARY_PATH $nvcommdir/nvshmem/lib

@@ -1,0 +1,1 @@
+nvcc -O3 -std=c++14 -acc=multicore  parMDS.cpp -o parMDS.out && ./parMDS.out myInputs/inp1000000.vrp -nthreads 20 -round 1 > Solutions/inp1000000_parMDS.sol

@@ -1,0 +1,2 @@
+nvcc fatal   : Unknown option '-acc=multicore'
+make: *** [parMDS] Error 1

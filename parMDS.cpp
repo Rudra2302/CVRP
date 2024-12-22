@@ -1,4 +1,3 @@
-%%writefile parMDS.cpp
 //~~~START:Thu, 16-Jun-2022, 12:43:32 IST
 // For GECCO'23 Submission.
 // nvc++ -O3 -std=c++14 -acc=multicore  parMDS.cpp -o parMDS.out && time ./parMDS.out toy.vrp 32
