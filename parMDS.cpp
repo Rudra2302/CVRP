@@ -119,7 +119,7 @@ class VRP {
   vector<Point> node;
   vector<weight_t> dist;
   Params params;
-  point_t max_x = 0, max_y = 0;
+  point_t max_x = -1e9, max_y = -1e9, min_x = 1e9, min_y = 1e9;
 
   size_t getSize() const {
     return size;
@@ -217,6 +217,8 @@ unsigned VRP::read(string filename) {
     node[id].y = stof(yStr);
     max_x = std::max(max_x, node[id].x);
     max_y = std::max(max_y, node[id].y);
+    min_x = std::min(min_x, node[id].x);
+    min_y = std::min(min_y, node[id].y);
     // std::cout<<id<<" "<<node[id].x<<" "<<node[id].y<<std::endl;
   }
 
@@ -418,11 +420,11 @@ std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::v
   int gridSize = 10;
   std::vector<std::vector<Point>> grid(gridSize * gridSize);
   std::map<std::pair<int,int>,int> coord;
-  double cellSize_x = vrp.max_x/gridSize+1, cellSize_y = vrp.max_y/gridSize+1;
+  double cellSize_x = (vrp.max_x - vrp.min_x)/gridSize+1, cellSize_y = (vrp.max_y - vrp.min_y)/gridSize+1;
 
   for (const auto& point : vrp.node) {
-      int row = point.y / cellSize_y;
-      int col = point.x / cellSize_x;
+      int row = (point.y - vrp.min_y) / cellSize_y;
+      int col = (point.x - vrp.min_x) / cellSize_x;
       int cellIndex = row * gridSize + col;
       grid[cellIndex].push_back(point);
 
@@ -436,6 +438,7 @@ std::vector<std::vector<Edge>> make_local_mst(const VRP &vrp, std::vector<std::v
   std::cout << "time at end of for loop 1: " << time_for1 << std::endl;
 
   std::vector<std::vector<Edge>> localMSTs(N);
+// #pragma omp parallel for shared(localMSTs)
   for (int i = 0; i < grid.size(); ++i) {
         int n = grid[i].size();
         if (n == 0) continue;

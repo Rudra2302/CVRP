@@ -1,0 +1,5 @@
+parMDS.cpp: In function ‘std::vector<std::vector<Edge> > make_local_mst(const VRP&, std::vector<std::vector<Edge> >)’:
+parMDS.cpp:457:18: warning: structured bindings only available with ‘-std=c++17’ or ‘-std=gnu++17’
+  457 |             auto [weight, edge] = pq.top();
+      |                  ^
+parMDS myInputs/inp100000.vrp Cost 7.37925e+06 7.20292e+06 6.7678e+06 Time(seconds) 2.92833 69.3751 77.2749 parLimit 20 VALID
